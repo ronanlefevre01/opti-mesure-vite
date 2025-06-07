@@ -59,25 +59,30 @@ export default function VideoMesure() {
     startCamera()
   }, [])
 
-  const handleMouseDown = (id) => {
-    setDragId(id)
-  }
-
-  const handleMouseUp = () => {
-    setDragId(null)
-  }
-
-  const handleMouseMove = (e) => {
+  const updatePosition = (clientX, clientY) => {
     if (dragId !== null && containerRef.current) {
       const bounds = containerRef.current.getBoundingClientRect()
-      const x = ((e.clientX - bounds.left) / bounds.width) * 100
-      const y = ((e.clientY - bounds.top) / bounds.height) * 100
+      const x = ((clientX - bounds.left) / bounds.width) * 100
+      const y = ((clientY - bounds.top) / bounds.height) * 100
 
       setRepères(reps => reps.map(r =>
         r.id === dragId ? { ...r, x: Math.max(0, Math.min(100, x)), y: Math.max(0, Math.min(100, y)) } : r
       ))
     }
   }
+
+  const handleMouseDown = (id) => setDragId(id)
+  const handleMouseUp = () => setDragId(null)
+  const handleMouseMove = (e) => updatePosition(e.clientX, e.clientY)
+
+  const handleTouchStart = (id) => setDragId(id)
+  const handleTouchMove = (e) => {
+    if (e.touches.length > 0) {
+      const touch = e.touches[0]
+      updatePosition(touch.clientX, touch.clientY)
+    }
+  }
+  const handleTouchEnd = () => setDragId(null)
 
   return (
     <div>
@@ -101,6 +106,8 @@ export default function VideoMesure() {
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
       >
         <video
           ref={videoRef}
@@ -112,6 +119,7 @@ export default function VideoMesure() {
           <div
             key={repère.id}
             onMouseDown={() => handleMouseDown(repère.id)}
+            onTouchStart={() => handleTouchStart(repère.id)}
             style={{
               position: 'absolute',
               top: repère.y + '%',
@@ -126,7 +134,8 @@ export default function VideoMesure() {
               display: 'flex',
               justifyContent: 'center',
               alignItems: 'center',
-              cursor: 'grab'
+              cursor: 'grab',
+              touchAction: 'none'
             }}
           >
             <div style={{
