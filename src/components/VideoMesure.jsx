@@ -12,6 +12,7 @@ export default function VideoMesure() {
     { id: 2, x: 55, y: 45 }
   ])
   const [dragId, setDragId] = useState(null)
+  const [result, setResult] = useState(null)
 
   useEffect(() => {
     async function startCamera() {
@@ -44,7 +45,7 @@ export default function VideoMesure() {
 
             setTimeout(() => {
               videoRef.current.pause()
-              setMessage("Mesure terminée. Placez les repères sur les pupilles.")
+              setMessage("Mesure terminée. Placez les repères sur les plots blancs.")
               setPaused(true)
             }, 5000)
           }
@@ -83,6 +84,20 @@ export default function VideoMesure() {
     }
   }
   const handleTouchEnd = () => setDragId(null)
+
+  const validerMesure = () => {
+    if (!containerRef.current) return
+    const container = containerRef.current.getBoundingClientRect()
+    const px1 = (repères[0].x / 100) * container.width
+    const py1 = (repères[0].y / 100) * container.height
+    const px2 = (repères[1].x / 100) * container.width
+    const py2 = (repères[1].y / 100) * container.height
+
+    const distPixels = Math.sqrt((px2 - px1) ** 2 + (py2 - py1) ** 2)
+    const mmPerPixel = 110 / distPixels
+    const resultText = `Distance : ${distPixels.toFixed(1)} px ≈ ${(distPixels * mmPerPixel).toFixed(1)} mm`
+    setResult(resultText)
+  }
 
   return (
     <div>
@@ -153,6 +168,14 @@ export default function VideoMesure() {
           </div>
         ))}
       </div>
+      {paused && (
+        <div style={{ marginTop: '20px', textAlign: 'center' }}>
+          <button onClick={validerMesure} style={{ padding: '10px 20px', fontSize: '16px' }}>
+            Valider les repères
+          </button>
+          {result && <p style={{ marginTop: '10px', fontWeight: 'bold' }}>{result}</p>}
+        </div>
+      )}
     </div>
   )
 }
