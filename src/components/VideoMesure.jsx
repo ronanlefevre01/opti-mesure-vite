@@ -1,6 +1,5 @@
 
 import React, { useEffect, useRef, useState } from 'react'
-import './VideoMesure.css'
 
 export default function VideoMesure() {
   const videoRef = useRef(null)
@@ -9,8 +8,8 @@ export default function VideoMesure() {
   const [flashSupported, setFlashSupported] = useState(null)
   const [paused, setPaused] = useState(false)
   const [repères, setRepères] = useState([
-    { id: 1, x: 40, y: 40 },
-    { id: 2, x: 70, y: 40 }
+    { id: 1, x: 45, y: 45 },
+    { id: 2, x: 55, y: 45 }
   ])
   const [dragId, setDragId] = useState(null)
 
@@ -113,7 +112,6 @@ export default function VideoMesure() {
           <div
             key={repère.id}
             onMouseDown={() => handleMouseDown(repère.id)}
-            className="repere"
             style={{
               position: 'absolute',
               top: repère.y + '%',
